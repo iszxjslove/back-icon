@@ -616,6 +616,38 @@ const names = [
   "三和银行（组合）",
 ];
 
+const xufunames = [
+  "交通银行（组合）",
+  "兴业银行（组合）",
+  "浦发银行（组合）",
+  "北京银行（组合）",
+  "贵州银行（组合）",
+  "四川天府银行（组合）",
+  "曲靖市商业银行（组合）",
+  "汉口银行（组合）",
+  "鹤壁银行（组合）",
+  "开封市商业银行（组合）",
+  "平顶山银行（组合）",
+  "新乡银行（组合）",
+  "东营银行（组合）",
+  "北京农商银行（组合）",
+  "重庆农商（组合）",
+  "东亚银行（组合）",
+  "华侨永亨银行（组合）",
+  "合作金库银行（组合）",
+  "台湾土地银行（组合）",
+  "台湾玉山银行（组合）",
+  "华侨银行（组合）",
+  "盘谷银行（组合）",
+  "苏格兰皇家银行（组合）",
+  "菲律宾首都银行（组合）",
+  "德意志银行（组合）",
+  "澳新银行（组合）",
+  "巴克莱银行（组合）",
+  "加拿大丰业银行（组合）",
+  "瑞典银行（组合）",
+];
+
 async function getFilesInDirectory(dirPath) {
   try {
     const files = await fs.readdir(dirPath);
@@ -701,42 +733,65 @@ function moveFile(name, targetDir, suffix = ".svg", newSuffix = ".svg") {
 }
 
 (async () => {
-  const iconDir = path.resolve(__dirname, "../icon");
-  const groupDir = path.resolve(__dirname, "../group");
-  const roundedDir = path.resolve(__dirname, "../rounded");
+  const xufuPath = path.resolve(__dirname, "../icon_lsdih7x8d7");
+  const groupDir = path.resolve(__dirname, "../docs/group");
+  fs.readdirSync(xufuPath).forEach((file, i) => {
+    if (!file.endsWith(".svg")) {
+      return;
+    }
+    let bankName = file.replace(/^([\u4e00-\u9fa5]+).*$/, "$1");
+    if (bankName.endsWith("农商")) {
+      bankName += "银行";
+    }
+    const pinyin = pinyinPro.pinyin(bankName, { toneType: "none", type: "array", segmentit: 3, v: true }).join("");
+    const sourceFile = path.join(xufuPath, file);
+    const targetFile = path.join(groupDir, pinyin + ".group.svg");
+    if (!fs.existsSync(targetFile)) {
+      console.log("文件不存在");
+    } else {
+      // fs.unlinkSync(targetFile);
+    }
+    fs.renameSync(sourceFile, targetFile);
 
-  const newNames = names.map((name) => {
-    const filename = name.replace(/^([\u4e00-\u9fa5]+).*$/, "$1");
-    if (!filename.endsWith("银行") && !filename.endsWith("信用社") && !filename.endsWith("联合社")) {
-      if (filename.endsWith("农商")) {
-        return filename;
-        // return filename + "银行";
-      }
-      if (filename.endsWith("商行")) {
-        return filename;
-        //   return filename.replace("商行", "商业银行");
-      }
-      return null;
-    }
-    return filename;
+    console.log(i, sourceFile, targetFile);
   });
-  const filterNames = newNames.filter((name) => !!name);
-  // 使用 Set 去除重复值
-  const uniqueNewNames = [...new Set(filterNames)];
-  console.log(uniqueNewNames.length);
-  const fileList = {};
-  function generateHTML(type, fileinfo) {
-    if (!fileList[fileinfo.pinyin]) {
-      fileList[fileinfo.pinyin] = {};
-    }
-    fileList[fileinfo.pinyin][type] = fileinfo;
-  }
-  uniqueNewNames.forEach((name) => {
-    generateHTML("rounded", moveFile(name, roundedDir, ".svg", ".rounded.svg"));
-    generateHTML("group", moveFile(name, groupDir, ".zuhe.svg", ".group.svg"));
-    generateHTML("icon", moveFile(name, iconDir, ".primary.svg", ".svg"));
-  });
-  fs.writeFileSync(path.join(__dirname, "../bank.min.js"), "const BANK_LIST=" + JSON.stringify(fileList));
+
+  // const iconDir = path.resolve(__dirname, "../icon");
+  // const groupDir = path.resolve(__dirname, "../docs/group");
+  // const roundedDir = path.resolve(__dirname, "../rounded");
+
+  // const newNames = xufunames.map((name) => {
+  //   const filename = name.replace(/^([\u4e00-\u9fa5]+).*$/, "$1");
+  //   // if (!filename.endsWith("银行") && !filename.endsWith("信用社") && !filename.endsWith("联合社")) {
+  //   //   if (filename.endsWith("农商")) {
+  //   //     return filename + "银行";
+  //   //   }
+  //   //   if (filename.endsWith("商行")) {
+  //   //     return filename.replace("商行", "商业银行");
+  //   //   }
+  //   //   return null;
+  //   // }
+  //   return filename;
+  // });
+  // const filterNames = newNames.filter((name) => !!name);
+  // // 使用 Set 去除重复值
+  // const uniqueNewNames = [...new Set(filterNames)];
+  // console.log(uniqueNewNames.length);
+  // console.log(uniqueNewNames);
+
+  // const fileList = {};
+  // function generateHTML(type, fileinfo) {
+  //   if (!fileList[fileinfo.pinyin]) {
+  //     fileList[fileinfo.pinyin] = {};
+  //   }
+  //   fileList[fileinfo.pinyin][type] = fileinfo;
+  // }
+  // uniqueNewNames.forEach((name) => {
+  //   generateHTML("rounded", moveFile(name, roundedDir, ".svg", ".rounded.svg"));
+  //   generateHTML("group", moveFile(name, groupDir, ".zuhe.svg", ".group.svg"));
+  //   generateHTML("icon", moveFile(name, iconDir, ".primary.svg", ".svg"));
+  // });
+  // fs.writeFileSync(path.join(__dirname, "../bank.min.js"), "const BANK_LIST=" + JSON.stringify(fileList));
 
   //   console.log(JSON.stringify(newNames));
 
